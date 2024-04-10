@@ -5,7 +5,7 @@ observation : schools
 country : United States
 
 ## Usage
-data(Caschool)
+data(Caschool)sdlkfj
 
 ## Format
 A dataframe containing :
