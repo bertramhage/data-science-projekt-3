@@ -28,7 +28,7 @@ Y <- df$mathscr
 regr <- lm(Y ~ X)
 
 # Print a tidy summary of the model
-stargazer(regr, type = "text")
+stargazer(regr, type = "latex")
 
 confint(regr, level = 0.9)
 
