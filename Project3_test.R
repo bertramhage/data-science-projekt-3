@@ -10,7 +10,7 @@ library(ggplot2)
 library(caret)
 library(stargazer)
 # Set up the dataframe
-df <- read_csv('/Users/jacobbrams/Library/Mobile Documents/com~apple~CloudDocs/UNI - 4.sem DTU/Data and Data Science/Projekt 3/Caschool.csv')
+df <- read_csv('exercise_1/Caschool.csv')
 
 data_selected <- select(df, mathscr , everything())
 
