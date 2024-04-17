@@ -10,7 +10,7 @@ library(ggplot2)
 library(caret)
 library(stargazer)
 # Set up the dataframe
-df <- read_csv('/Users/jacobbrams/Library/Mobile Documents/com~apple~CloudDocs/UNI - 4.sem DTU/Data and Data Science/Projekt 3/Caschool.csv')
+df <- read_csv('exercise_1/Caschool.csv')
 
 data_selected <- select(df, mathscr , everything())
 
@@ -28,7 +28,7 @@ Y <- df$mathscr
 regr <- lm(Y ~ X)
 
 # Print a tidy summary of the model
-stargazer(regr, type = "text")
+stargazer(regr, type = "latex")
 
 confint(regr, level = 0.9)
 
