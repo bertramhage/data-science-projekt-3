@@ -27,15 +27,16 @@ print(count_ms_baleno)
 
 #show the biggest difference in distance
 cars24_mb_distance = cars24_mb['Distance'].max() - cars24_mb['Distance'].min()
-print("Max distance: ", cars24_mb_distance, "km")
+print("Max difference in distance: ", cars24_mb_distance, "km")
 
-#show the biggest difference in price
+#show the biggest price
 cars24_mb_price = cars24_mb['Price'].max()
-print("Max price: ", cars24_mb_price, "EUR")
+print("Highest price: ", cars24_mb_price, "EUR")
 #%%x
 
 #make summary statistics
 cars24_mb.describe()
+'''print(cars24_mb.describe())'''
 
 start_date = cars24_mb['Year'].min()
 end_date = cars24_mb['Year'].max()
@@ -187,7 +188,7 @@ ax[1, 1].set_ylabel('Price')
 plt.tight_layout()
 plt.show()
 
-# %%
+#%%
 #change the name of Drive from 0 and 1 to Manual and Automatic
 cars24_mb['Drive'] = cars24_mb['Drive'].replace(0, 'Manual')
 cars24_mb['Drive'] = cars24_mb['Drive'].replace(1, 'Automatic')
