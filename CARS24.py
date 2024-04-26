@@ -231,3 +231,38 @@ print(f"Marginal effect of car age: {marginal_effect_age}")
 
 
 # %%
+# Model diagnostic plots
+fig, ax = plt.subplots(1, 2, figsize=(14, 7))
+
+# Residuals vs Fitted
+sns.residplot(x=model.fittedvalues, y=model.resid, lowess=True, ax=ax[0], line_kws={'color': 'red', 'lw': 1})
+ax[0].set_title('Residuals vs Fitted')
+ax[0].set_xlabel('Fitted values')
+ax[0].set_ylabel('Residuals')
+ax[0].axhline(y=0, color='black', linewidth=1)
+ax[0].legend(['Residuals', 'Fitted values'])
+
+# QQ Plot
+sm.qqplot(model.resid, line='45', fit=True, ax=ax[1])
+ax[1].set_title('Normal Q-Q')
+
+plt.tight_layout()
+plt.legend(['Residuals', 'Fitted values'])
+plt.show()
+
+# Influential Variables
+standardized_coeffs = model.params / model.bse
+print("Standardized coefficients:\n", standardized_coeffs)
+
+# Discussion of Influential Variables
+print("\nDiscussion: ")
+print(f"Distance has a standardized coefficient of {standardized_coeffs['Distance']:.3f}, indicating {'stronger' if abs(standardized_coeffs['Distance']) > abs(standardized_coeffs['Year']) else 'weaker'} influence on price compared to car age.")
+print(f"Car age has a standardized coefficient of {standardized_coeffs['Year']:.3f}, which shows its {'significant' if standardized_coeffs['Year'] >= 2 or standardized_coeffs['Year'] <= -2 else 'less significant'} impact on the price.")
+
+# Discussing Uncertainties and Limitations
+print("\nModel Uncertainties and Limitations:")
+print("1. Potential multicollinearity between Distance and Year if older cars typically have higher km.")
+print("2. Model assumes linear relationships; real-world relationships might be non-linear or require transformation.")
+print("3. Presence of high leverage points or outliers could distort the model, as seen if Cook's distance is significant for any observation.")
+
+#%%
