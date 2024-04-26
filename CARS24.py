@@ -211,7 +211,23 @@ plt.show()
 
 # %%
 
+# Assuming 'Distance' is km driven and 'Year' represents the car age calculated from the current year
+cars24_mb['Year'] = 2024 - cars24_mb['Year']  # Replace 2024 with the current year if needed
+X = cars24_mb[['Distance', 'Year']]
+X = sm.add_constant(X)  # Adds a constant term to the predictor
+y = cars24_mb['Price']
 
+model = sm.OLS(y, X).fit()
+print(model.summary())
+
+#%%
+# Calculate elasticity of price with respect to km
+elasticity_km = model.params['Distance'] * (cars24_mb['Distance'].mean() / cars24_mb['Price'].mean())
+print(f"Elasticity of price with respect to km: {elasticity_km}")
+
+# Calculate marginal effect of car age
+marginal_effect_age = model.params['Year']
+print(f"Marginal effect of car age: {marginal_effect_age}")
 
 
 # %%
