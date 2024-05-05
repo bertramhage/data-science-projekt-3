@@ -18,50 +18,37 @@ library(tidyr)
 library(ggplot2)
 library(caret)
 library(stargazer)
+library(car)
 
 
 data("Boston")  # Load the Boston dataset
 
-# Create the nox_dum variable
+# Create nox_dum variable
 Boston$nox_dum <- ifelse(Boston$nox > 0.5, 1, 0)
 
-# View the first few rows to check the dummy variable
-head(Boston)
 
 # Summary statistics for nox_dum
 summary(Boston$nox_dum)
 
-# Assuming cor_matrix is already calculated
-cor_matrix <- cor(Boston[, -which(names(Boston) == "nox_dum")], use = "pairwise.complete.obs")
+# Correlation of nox_dum with other variables
+cor(Boston[-which(names(Boston) == "nox")], Boston$nox_dum)
 
-# Plot the correlation matrix using ggcorrplot
-ggcorrplot(cor_matrix, method = "square", 
-           lab = TRUE,  # Show correlation coefficients
-           type = "full",  # Display the lower triangle of the correlation matrix
-           lab_size = 3,  # Adjust the size of the correlation coefficients
-           colors = c("#6D9EC1", "white", "#E46726"),  # Colors: blue to white to red
-           title = "Correlation Matrix of Boston Dataset Variables",
-           ggtheme = theme_minimal())  # Use a minimal theme
+# Load the car package for vif function
+library(car)
 
-# Fit logistic regression model
-model <- glm(nox_dum ~ . - crim, data = Boston, family = binomial)
+# Model with all other predictors
+model <- lm(nox ~ . - nox_dum - crim, data = Boston)  # Exclude crim as per project description
 
-summary(model)
-# Load stargazer for creating nice tables
-library(stargazer)
+# Calculate VIF
+vif(model)
 
-# Display the model output using stargazer
-stargazer(model, type = "text")
+# Load the MASS package for logistic regression
+library(MASS)
 
+# Initial logistic regression model
+logit_model <- glm(nox_dum ~ zn + indus + chas + rm + age + dis + rad + tax + ptratio + lstat + medv, family = binomial, data = Boston)
+summary(logit_model)
 
-# Setting up the plotting area to accommodate multiple plots
-par(mfrow=c(1, 2))  # Adjust the layout based on the number of variables
+vif(logit_model)
 
-# List of variable names to plot
-variable_names <- names(Boston)
-
-# Loop through each variable in the dataset
-for (var in variable_names) {
-  # Create a boxplot for each variable
-  boxplot(Boston[[var]], main=var)
-}
+stargazer(logit_model, type = "latex", title = "Logistic Regression Results", out = "model_output.txt")
