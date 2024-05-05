@@ -9,6 +9,10 @@ cars24 = pd.read_csv('/Users/jacobbrams/Library/Mobile Documents/com~apple~Cloud
 
 #show data
 cars24.head()
+# Drop the 'Unnamed: 0' column
+cars24.drop(columns='Unnamed: 0', inplace=True)
+
+# Show data
 print(cars24.head())
 #%%
 
@@ -38,10 +42,13 @@ print("Highest price: ", cars24_mb_price, "EUR")
 cars24_mb.describe()
 '''print(cars24_mb.describe())'''
 
-start_date = cars24_mb['Year'].min()
+#make a latex table for the summary statistics
+summary = cars24_mb.describe().T
+
+'''start_date = cars24_mb['Year'].min()
 end_date = cars24_mb['Year'].max()
 print("Start date: ", start_date)
-print("End date: ", end_date)
+print("End date: ", end_date)'''
 #%%x
 #average distance, min and max distance
 avg_distance = cars24_mb['Distance'].mean()
@@ -60,16 +67,19 @@ print("Min price: ", min_price, "EUR")
 print("Max price: ", max_price, "EUR")
 #%%x
 
-#Correlation calculation
-cars24_mb_corr = cars24_mb.corr()
-cars24_mb_corr
+# Assuming 'cars24_mb' is already filtered for 'Maruti Baleno' and loaded correctly
+# First, make sure you drop or select only numeric columns before calculating correlation
+numeric_columns = cars24_mb.select_dtypes(include=[np.number])  # This ensures only numeric columns are included
+cars24_mb_corr = numeric_columns.corr()  # Calculate correlation on numeric columns only
 
-#Correlation matrix for Maruti Baleno
-sns.heatmap(cars24_mb_corr, annot=True)
+# Plotting the correlation matrix with heatmap
+sns.heatmap(cars24_mb_corr, annot=True)  # 'annot=True' to annotate cells with correlation coefficients
 plt.show()
-#save the plot
-'''plt.savefig('/Users/jacobbrams/Library/Mobile Documents/com~apple~CloudDocs/UNI - 4.sem DTU/Data and Data Science/Projekt 3/Part II/Correlation_Matrix.png', dpi=300, bbox_inches='tight', pad_inches=0.5)'''
-#scatter plot for price and distance
+
+# Save the plot - adjust the path as needed for your environment
+# plt.savefig('Correlation_Matrix.png', dpi=300, bbox_inches='tight', pad_inches=0.5)
+
+# Scatter plot for Price vs Distance
 plt.scatter(cars24_mb['Price'], cars24_mb['Distance'])
 plt.xlabel('Price')
 plt.ylabel('Distance')
