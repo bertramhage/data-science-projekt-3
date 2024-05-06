@@ -40,10 +40,8 @@ print("Highest price: ", cars24_mb_price, "EUR")
 
 #make summary statistics
 cars24_mb.describe()
-'''print(cars24_mb.describe())'''
+print(cars24_mb.describe())
 
-#make a latex table for the summary statistics
-summary = cars24_mb.describe().T
 
 '''start_date = cars24_mb['Year'].min()
 end_date = cars24_mb['Year'].max()
