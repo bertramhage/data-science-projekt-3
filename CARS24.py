@@ -91,9 +91,9 @@ import statsmodels.api as sm
 from statsmodels.formula.api import ols
 from statsmodels.iolib.summary2 import summary_col
 
-#make th varibable Drive as a dummy variable
-cars24_mb['Drive'] = cars24_mb['Drive'].astype('category')
-cars24_mb['Drive'] = cars24_mb['Drive'].cat.codes
+#make th varibable Drive as a dummy variable where manual is 0 and automatic is 1
+cars24_mb['Drive'] = cars24_mb['Drive'].replace('Manual', 0)
+cars24_mb['Drive'] = cars24_mb['Drive'].replace('Automatic', 1)
 
 model1 = ols('Price ~ Distance + Year + Owner + Drive', data=cars24_mb).fit()
 model2 = ols('Price ~ Distance * Year + Owner + Drive', data=cars24_mb).fit()
@@ -228,3 +228,11 @@ print("2. Model assumes linear relationships; real-world relationships might be 
 print("3. Presence of high leverage points or outliers could distort the model, as seen if Cook's distance is significant for any observation.")
 
 #%%
+#check for heteroscedasticity
+from statsmodels.stats.diagnostic import het_breuschpagan
+_, p_value, _, _ = het_breuschpagan(model1.resid, X)
+print(f"P-value for Breusch-Pagan test: {p_value}")
+
+
+
+# %%
