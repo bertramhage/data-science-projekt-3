@@ -149,6 +149,7 @@ ax[1, 1].set_ylabel('Price')
 plt.tight_layout()
 plt.show()
 
+
 #%%
 #change the name of Drive from 0 and 1 to Manual and Automatic
 cars24_mb['Drive'] = cars24_mb['Drive'].replace(0, 'Manual')
@@ -210,7 +211,7 @@ ax[1].set_title('Normal Q-Q')
 plt.tight_layout()
 plt.legend(['Residuals', 'Fitted values'])
 plt.show()
-#%%
+
 # Influential Variables
 standardized_coeffs = model.params / model.bse
 print("Standardized coefficients:\n", standardized_coeffs)
@@ -227,5 +228,3 @@ print("2. Model assumes linear relationships; real-world relationships might be 
 print("3. Presence of high leverage points or outliers could distort the model, as seen if Cook's distance is significant for any observation.")
 
 #%%
-
-# %%
