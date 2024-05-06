@@ -37,7 +37,7 @@ cor(Boston[-which(names(Boston) == "nox")], Boston$nox_dum)
 library(car)
 
 # Model with all other predictors
-model <- lm(nox ~ . - nox_dum - crim, data = Boston)  # Exclude crim as per project description
+model <- lm(nox_dum ~ . - nox, data = Boston)  # Exclude crim as per project description
 
 # Calculate VIF
 vif(model)
@@ -52,3 +52,14 @@ summary(logit_model)
 vif(logit_model)
 
 stargazer(logit_model, type = "latex", title = "Logistic Regression Results", out = "model_output.txt")
+
+# Regression model where we remove variables with high vif
+
+logit_model_revised <- glm(nox_dum ~ zn + indus + chas + age + dis + rad + tax + ptratio + lstat, family = binomial, data = Boston)
+summary(logit_model_revised)
+
+vif(logit_model_revised)
+
+
+logit_model_revised_final <- glm(nox_dum ~ zn + indus + chas + age + dis + rad + tax, family = binomial, data = Boston)
+summary(logit_model_revised_final)
