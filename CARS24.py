@@ -1,121 +1,48 @@
-#%%x
+#%%
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-
-#load data
-cars24 = pd.read_csv('/Users/jacobbrams/Library/Mobile Documents/com~apple~CloudDocs/UNI - 4.sem DTU/Data and Data Science/Projekt 3/data-science-projekt-3/cars_24_combined.csv')
-
-#show data
-cars24.head()
-# Drop the 'Unnamed: 0' column
-cars24.drop(columns='Unnamed: 0', inplace=True)
-
-# Show data
-print(cars24.head())
-#%%
-
-#count which car names are most common
-count = cars24['Car Name'].value_counts()
-print(count)
-
-#remove rows with missing values
-cars24 = cars24.dropna()
-
-#filter only containning mariuti baleno
-cars24_mb = cars24[cars24['Car Name'].str.contains('Maruti Baleno')]
-count_ms_baleno = cars24_mb['Car Name'].value_counts()
-print(count_ms_baleno)
-#%%x
-
-#show the biggest difference in distance
-cars24_mb_distance = cars24_mb['Distance'].max() - cars24_mb['Distance'].min()
-print("Max difference in distance: ", cars24_mb_distance, "km")
-
-#show the biggest price
-cars24_mb_price = cars24_mb['Price'].max()
-print("Highest price: ", cars24_mb_price, "EUR")
-#%%x
-
-#make summary statistics
-cars24_mb.describe()
-print(cars24_mb.describe())
-
-
-'''start_date = cars24_mb['Year'].min()
-end_date = cars24_mb['Year'].max()
-print("Start date: ", start_date)
-print("End date: ", end_date)'''
-#%%x
-#average distance, min and max distance
-avg_distance = cars24_mb['Distance'].mean()
-min_distance = cars24_mb['Distance'].min()
-max_distance = cars24_mb['Distance'].max()
-print("Average distance: ", avg_distance, "km")
-print("Min distance: ", min_distance, "km")
-print("Max distance: ", max_distance, "km")
-
-#average price, min and max price
-avg_price = cars24_mb['Price'].mean()
-min_price = cars24_mb['Price'].min()
-max_price = cars24_mb['Price'].max()
-print("Average price: ", avg_price, "EUR")
-print("Min price: ", min_price, "EUR")
-print("Max price: ", max_price, "EUR")
-#%%x
-
-# Assuming 'cars24_mb' is already filtered for 'Maruti Baleno' and loaded correctly
-# First, make sure you drop or select only numeric columns before calculating correlation
-numeric_columns = cars24_mb.select_dtypes(include=[np.number])  # This ensures only numeric columns are included
-cars24_mb_corr = numeric_columns.corr()  # Calculate correlation on numeric columns only
-
-# Plotting the correlation matrix with heatmap
-sns.heatmap(cars24_mb_corr, annot=True)  # 'annot=True' to annotate cells with correlation coefficients
-plt.show()
-
-# Save the plot - adjust the path as needed for your environment
-# plt.savefig('Correlation_Matrix.png', dpi=300, bbox_inches='tight', pad_inches=0.5)
-
-# Scatter plot for Price vs Distance
-plt.scatter(cars24_mb['Price'], cars24_mb['Distance'])
-plt.xlabel('Price')
-plt.ylabel('Distance')
-plt.title('Price vs Distance')
-plt.show()
-#save the plot
-'''plt.savefig('/Users/jacobbrams/Library/Mobile Documents/com~apple~CloudDocs/UNI - 4.sem DTU/Data and Data Science/Projekt 3/Part II/Price_vs_Distance.png', dpi=300, bbox_inches='tight', pad_inches=0.5)'''
-#%%x
-# estimate a regression model for price as a function of distance, year and owner
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
 from statsmodels.iolib.summary2 import summary_col
 
-#make th varibable Drive as a dummy variable where manual is 0 and automatic is 1
-cars24_mb['Drive'] = cars24_mb['Drive'].replace('Manual', 0)
-cars24_mb['Drive'] = cars24_mb['Drive'].replace('Automatic', 1)
+# Load data
+cars24 = pd.read_csv('/Users/jacobbrams/Library/Mobile Documents/com~apple~CloudDocs/UNI - 4.sem DTU/Data and Data Science/Projekt 3/data-science-projekt-3/cars_24_combined.csv')
 
+# Drop the 'Unnamed: 0' column if it exists
+cars24.drop(columns=[col for col in cars24.columns if 'Unnamed' in col], inplace=True, errors='ignore')
+
+# Remove rows with missing values
+cars24.dropna(inplace=True)
+
+# Filtering for 'Maruti Baleno'
+cars24_mb = cars24[cars24['Car Name'].str.contains('Maruti Baleno')]
+
+# Standardization of numerical columns + year should be the age of the car
+numeric_cols = cars24_mb.select_dtypes(include=[np.number])
+for col in numeric_cols:
+    cars24_mb[col] = (cars24_mb[col] - cars24_mb[col].mean()) / cars24_mb[col].std()
+
+# Convert 'Drive' into a dummy variable
+cars24_mb['Drive'] = cars24_mb['Drive'].map({'Manual': 0, 'Automatic': 1})
+
+#Year should be the age of the car
+cars24_mb['Year'] = 2024 - cars24_mb['Year']
+
+# Define models
 model1 = ols('Price ~ Distance + Year + Owner + Drive', data=cars24_mb).fit()
 model2 = ols('Price ~ Distance * Year + Owner + Drive', data=cars24_mb).fit()
 model3 = ols('Price ~ Distance + Year + Owner + Drive + Distance * Year', data=cars24_mb).fit()
 model4 = ols('Price ~ Distance + Year + Owner + Drive + np.power(Year, 2)', data=cars24_mb).fit()
 
-# Summarize models using summary_col for a nicer output
-results_table = summary_col([model1, model2, model3,model4], stars=True, float_format='%0.2f',
+# Summarize models
+results_table = summary_col([model1, model2, model3, model4], stars=True, float_format='%0.2f',
                             model_names=['Model 1: Linear', 'Model 2: Interaction', 'Model 3: Interaction + Linear', 'Model 4: Quadratic'],
                             info_dict={'R-squared': lambda x: "{:.2f}".format(x.rsquared),
                                        'No. observations': lambda x: "{0:d}".format(int(x.nobs))})
 
 print(results_table)
-#%%
-
-#Elasiticity of price with respect to distance
-print('Elasticity of price with respect to distance')
-print('Model 1 Elasiticity Price - Distance: ', model1.params['Distance'] * cars24_mb['Distance'].mean() / cars24_mb['Price'].mean())
-print('Model 2 Elasiticity Price - Distance: ', model2.params['Distance'] * cars24_mb['Distance'].mean() / cars24_mb['Price'].mean())
-print('Model 3 Elasiticity Price - Distance: ', model3.params['Distance'] * cars24_mb['Distance'].mean() / cars24_mb['Price'].mean())
-print('Model 4 Elasiticity Price - Distance: ', model4.params['Distance'] * cars24_mb['Distance'].mean() / cars24_mb['Price'].mean())
-
 
 
 # %%
@@ -183,15 +110,20 @@ model = sm.OLS(y, X).fit()
 print(model.summary())
 
 #%%
-# Calculate elasticity of price with respect to km
-elasticity_km = model.params['Distance'] * (cars24_mb['Distance'].mean() / cars24_mb['Price'].mean())
+# Calculate elasticity of price with respect to km and make a table for the elasticity of price with respect to distance for each model
+elasticity_km = model4.params['Distance'] * (cars24_mb['Distance'].mean() / cars24_mb['Price'].mean())
 print(f"Elasticity of price with respect to km: {elasticity_km}")
 
 # Calculate marginal effect of car age
-marginal_effect_age = model.params['Year']
+marginal_effect_age = model1.params['Year']
 print(f"Marginal effect of car age: {marginal_effect_age}")
 
 
+#make a table with eleasticity of price given distance for each of the models  
+elasticity = pd.DataFrame({'Model': ['Model 1', 'Model 2', 'Model 3', 'Model 4'],
+                           'Elasticity of Price with respect to Distance': [model1.params['Distance'], model2.params['Distance'], model3.params['Distance'], model4.params['Distance']]})
+
+print(elasticity)
 # %%
 # Model diagnostic plots
 fig, ax = plt.subplots(1, 2, figsize=(14, 7))
@@ -234,5 +166,46 @@ _, p_value, _, _ = het_breuschpagan(model1.resid, X)
 print(f"P-value for Breusch-Pagan test: {p_value}")
 
 
+
+# %%
+# Antag at 'cars24_mb' er dit dataframe, som allerede er indlæst og forberedt
+average_distance = cars24_mb['Distance'].mean()
+average_price = cars24_mb['Price'].mean()
+
+# Beregn elasticiteten med koefficienten fra Model 1
+beta_distance = -0.14  # Fra Model 1: Linear
+elasticity_price_distance = beta_distance * (average_distance / average_price)
+
+print("Gennemsnitlig Distance:", average_distance)
+print("Gennemsnitlig Pris:", average_price)
+print("Price Elasticity of Distance:", elasticity_price_distance)
+# %%
+def calculate_elasticity(model, data):
+    beta_distance = model.params['Distance']
+    average_distance = data['Distance'].mean()
+    average_price = data['Price'].mean()
+    elasticity = beta_distance * (average_distance / average_price)
+    return elasticity
+
+# Assuming cars24_mb is your dataset after filtering for 'Maruti Baleno' or whatever your criteria was
+elasticity_model1 = calculate_elasticity(model1, cars24_mb)
+elasticity_model2 = calculate_elasticity(model2, cars24_mb)
+elasticity_model3 = calculate_elasticity(model3, cars24_mb)
+elasticity_model4 = calculate_elasticity(model4, cars24_mb)
+
+# Create a DataFrame to display the elasticities for each model
+elasticities = {
+    "Model": ["Model 1", "Model 2", "Model 3", "Model 4"],
+    "Elasticity of Price w.r.t Km": [
+        elasticity_model1, 
+        elasticity_model2, 
+        elasticity_model3, 
+        elasticity_model4
+    ]
+}
+
+elasticity_table = pd.DataFrame(elasticities)
+print(elasticity_table)
+# %%
 
 # %%
